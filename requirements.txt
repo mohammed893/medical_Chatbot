@@ -1,5 +1,12 @@
-ctransformers
-sentence-transformers==2.2.2
-pinecone-client
-langchain==0.0.225
-flask
+langchain
+torch
+accelerate
+#bitsandbytes
+transformers
+sentence_transformers
+streamlit
+streamlit_chat
+faiss-cpu
+altair
+tiktoken
+huggingface-hub

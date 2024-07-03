@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HealthCare ChatBot 🧑🏽‍⚕️</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .chat-container {
+            max-width: 600px;
+            margin: 50px auto;
+        }
+        .chat-box {
+            border: 1px solid #ccc;
+            padding: 10px;
+            height: 400px;
+            overflow-y: scroll;
+        }
+        .user-message {
+            text-align: right;
+            color: blue;
+        }
+        .bot-message {
+            text-align: left;
+            color: green;
+        }
+        .loading {
+            text-align: center;
+            margin-top: 20px;
+            display: block;
+        }
+        .chat-content {
+            display: none; /* Hide chat content initially */
+        }
+    </style>
+</head>
+<body>
+    <div class="container chat-container">
+        <h1>HealthCare ChatBot 🧑🏽‍⚕️</h1>
+        <div class="loading" id="loading-div">
+            <p>Loading... Please wait</p>
+        </div>
+        <div class="chat-box chat-content" id="chat-box">
+            {% for msg in past %}
+            <div class="user-message"><strong>You:</strong> {{ msg }}</div>
+            <div class="bot-message"><strong>Bot:</strong> {{ generated[loop.index] }}</div>
+            {% endfor %}
+        </div>
+        <form id="chat-form" class="chat-content">
+            <div class="form-group">
+                <input type="text" class="form-control" id="message" placeholder="Ask about your Mental Health">
+            </div>
+            <button type="submit" class="btn btn-primary">Send</button>
+        </form>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            // Function to check if loading is complete
+            function checkLoadingComplete() {
+                $.ajax({
+                    url: '/check_loading_complete',
+                    method: 'GET',
+                    success: function(response){
+                        if (response.loading_complete) {
+                            $('#loading-div').hide(); // Hide loading message
+                            $('.chat-content').show(); // Show chat content
+                        } else {
+                            setTimeout(checkLoadingComplete, 1000); // Check again after 1 second
+                        }
+                    }
+                });
+            }
+
+            checkLoadingComplete(); // Start checking loading status
+
+            $('#chat-form').on('submit', function(event){
+                event.preventDefault();
+                var message = $('#message').val();
+                $.ajax({
+                    url: '/chat',
+                    method: 'POST',
+                    data: { message: message },
+                    success: function(response){
+                        $('#chat-box').append('<div class="user-message"><strong>You:</strong> ' + message + '</div>');
+                        $('#chat-box').append('<div class="bot-message"><strong>Bot:</strong> ' + response.generated[response.generated.length - 1] + '</div>');
+                        $('#message').val('');
+                        $('#chat-box').scrollTop($('#chat-box')[0].scrollHeight);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
